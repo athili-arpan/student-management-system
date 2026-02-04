@@ -2,10 +2,12 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../firebase/firebaseConfig";
 import {
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
+
 
 const AuthContext = createContext();
 
@@ -15,9 +17,9 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const loginWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+ const loginWithGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  await signInWithRedirect(auth, provider);
   };
 
   const logout = async () => {
@@ -25,12 +27,15 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
+  getRedirectResult(auth).catch(console.error);
+
+  const unsub = onAuthStateChanged(auth, (currentUser) => {
+    setUser(currentUser);
+    setLoading(false);
+  });
+
+  return () => unsub();
+}, []);
 
   return (
     <AuthContext.Provider value={{ user, loginWithGoogle, logout }}>
