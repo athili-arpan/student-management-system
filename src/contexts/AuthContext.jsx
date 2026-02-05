@@ -27,7 +27,9 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-  getRedirectResult(auth).catch(console.error);
+  getRedirectResult(auth).catch((err) =>
+      console.error("Redirect error:", err)
+);
 
   const unsub = onAuthStateChanged(auth, (currentUser) => {
     setUser(currentUser);
@@ -38,7 +40,7 @@ export function AuthProvider({ children }) {
 }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loginWithGoogle, logout: () => signOut(auth) }}>
       {!loading && children}
     </AuthContext.Provider>
   );
